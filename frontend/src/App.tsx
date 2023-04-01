@@ -7,7 +7,7 @@ function App() {
   const [count, setCount] = useState(0);
 
   const handleFetchWithProxy = async () => {
-    const response = await fetch("/api");
+    const response = await fetch("/api/healthcheck");
     console.log(await response.text());
   };
 
