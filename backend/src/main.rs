@@ -1,11 +1,22 @@
-use actix_web::{web, post, App, HttpServer, Responder, Result};
-use risc0_zkvm::{Receipt, Result as ZkvmResult, Prover, serde::{to_vec, from_slice}};
+use actix_web::{web, get, post, App, HttpServer, Responder, Result, HttpResponse};
+use risc0_zkvm::{Receipt, Result as ZkvmResult, Prover, serde::{from_slice, to_vec}};
 use serde::{Deserialize, Serialize};
-use methods::{GUESS_ID, GUESS_ELF};
+use methods::{WORDLE_ELF};
+use wordle_core::{GameState};
+use std::sync::Mutex;
+use rand::{Rng, thread_rng};
+use crate::wordlist::words::pick_word;
+
+mod wordlist;
+
+struct AppState {
+    salt: [u8; 32],
+    word: String,
+}
 
 #[derive(Deserialize)]
 struct GuessInput {
-    guess: i32,
+    guess: String,
 }
 
 #[derive(Serialize)]
@@ -14,9 +25,37 @@ struct GuessOutput {
     receipt: Receipt,
 }
 
+#[derive(Serialize)]
+struct InitOutput {
+    salt: String,
+    word: String,
+}
+
+#[get("/")]
+async fn status() -> impl Responder {
+    HttpResponse::Ok().body("OK")
+}
+
+#[post("/init")]
+async fn init(data: web::Data<Mutex<AppState>>) -> Result<impl Responder> {
+    let mut state = data.lock().unwrap();
+
+    state.salt = generate_salt();
+    state.word = String::from(pick_word());
+
+    let output = InitOutput {
+        salt: hex::encode(state.salt),
+        word: state.word.clone(),
+    };
+
+    Ok(web::Json(output))
+}
+
 #[post("/guess")]
-async fn guess(req_body: web::Json<GuessInput>) -> Result<impl Responder> {
-    let output = match check_guess_proof(req_body.into_inner()) {
+async fn guess(req_body: web::Json<GuessInput>, data: web::Data<Mutex<AppState>>) -> Result<impl Responder> {
+    let state = data.lock().unwrap();
+
+    let output = match check_guess_proof(req_body.guess.clone(), state.word.clone(), state.salt.clone()) {
         Ok(output) => output,
         Err(_e) => {
             return Err(actix_web::error::ErrorInternalServerError("Proof failed"))
@@ -25,27 +64,48 @@ async fn guess(req_body: web::Json<GuessInput>) -> Result<impl Responder> {
     Ok(web::Json(output))
 }
 
-fn check_guess_proof(input: GuessInput) -> ZkvmResult<GuessOutput> {
-    let mut prover = Prover::new(GUESS_ELF, GUESS_ID)?;
-    let my_answer = 42;
-    
-    prover.add_input_u32_slice(&to_vec(&my_answer).unwrap());
-    prover.add_input_u32_slice(&to_vec(&input.guess).unwrap());
+fn check_guess_proof(guess_word: String, correct_word: String, salt: [u8; 32]) -> ZkvmResult<GuessOutput> {
+    let mut prover = Prover::new(WORDLE_ELF).expect("failed to construct prover");
 
-    let receipt = prover.run()?;
-    let product: bool = from_slice(&receipt.journal)?;
+    println!("correct_word: {:?}", correct_word);
 
-    Ok(GuessOutput { correct: product, receipt })
+    let hex_salt = hex::encode(salt);
+    println!("hex_salt: {:?}", hex_salt);
+
+    prover.add_input_u32_slice(to_vec(&correct_word).unwrap().as_slice());
+    prover.add_input_u32_slice(to_vec(&guess_word).unwrap().as_slice());
+    prover.add_input_u32_slice(to_vec(&hex_salt).unwrap().as_slice());
+
+    let receipt = prover.run().unwrap();
+
+    let game_state: GameState = from_slice(&receipt.journal).unwrap();
+    let correct = game_state.feedback.game_is_won();
+
+    Ok(GuessOutput { correct, receipt })
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
+    let data = web::Data::new(Mutex::new(AppState {
+        salt: generate_salt(),
+        word: String::from(pick_word()),
+    }));
+
+    HttpServer::new(move || {
         App::new()
+            .app_data(web::Data::clone(&data))
             .service(guess)
+            .service(init)
+            .service(status)
     })
-    .bind(("127.0.0.1", 9000))?
-    .run()
-    .await
+        .bind(("127.0.0.1", 9000))?
+        .run()
+        .await
 }
 
+fn generate_salt() -> [u8; 32] {
+    let mut rng = thread_rng();
+    let mut salt = [0u8; 32];
+    rng.fill(&mut salt);
+    salt
+}
