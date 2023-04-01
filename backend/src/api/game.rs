@@ -1,15 +1,22 @@
-use actix_web::{post, web, Responder, Result};
-use ethers::{prelude::*, providers::{Http, Provider}, types::U256};
+use crate::state::AppState;
+use actix_web::{post, web, HttpResponse, Responder, Result};
+use ethers::{
+    prelude::*,
+    providers::{Http, Provider},
+    types::U256,
+};
 use methods::{WORDLE_ELF, WORDLE_ID};
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
-    sha::{Impl, Sha256},
+    sha::{Digest, Impl, Sha256},
     Prover, Result as ZkvmResult,
 };
 use serde::{Deserialize, Serialize};
-use std::{env, sync::{Arc, Mutex}};
+use std::{
+    env,
+    sync::{Arc, Mutex},
+};
 use wordle_core::GameState;
-use crate::state::AppState;
 
 // Add client type
 type Client = SignerMiddleware<Provider<Http>, Wallet<k256::ecdsa::SigningKey>>;
@@ -19,6 +26,7 @@ abigen!(
     WordleContract,
     r"[
     function setCommitment(bytes32 commitment)
+    function setImageId(bytes32 imageId)
     ]"
 );
 
@@ -79,6 +87,12 @@ pub async fn guess(
     Ok(web::Json(output))
 }
 
+// TODO: This should be called only once when server builds/starts
+#[post("/image")]
+pub async fn image() -> Result<HttpResponse> {
+    set_image_id_in_contract().await?;
+    Ok(HttpResponse::Ok().finish())
+}
 
 fn check_guess_proof(
     guess_word: String,
@@ -132,6 +146,36 @@ async fn set_commitment_in_contract(
     // 3. Send transaction that updates commitment
     let tx = contract
         .set_commitment(commitment_bytes)
+        .gas(U256::from(50000)) // Gas
+        .gas_price(U256::from(10_000_000_000u128)) // 10 Gwei - set experimentally. 1 Gwei is too little
+        .send()
+        .await?
+        .await?;
+
+    println!("\nTransaction Receipt: {}", serde_json::to_string(&tx)?);
+
+    Ok(())
+}
+
+async fn set_image_id_in_contract() -> Result<(), Box<dyn std::error::Error>> {
+    println!("\nSetting new image ID...");
+    let image_id = Digest::from(WORDLE_ID);
+    let image_id_bytes: [u8; 32] = image_id.try_into().unwrap();
+
+    println!("image_id: {}", image_id);
+    println!("image_id_bytes: {:?}", image_id_bytes);
+
+    // 2. Create contract instance
+    let client = get_client().await.unwrap();
+    let contract_addr = env::var("CONTRACT_ADDRESS").expect("$CONTRACT_ADDRESS is not set");
+    let contract = WordleContract::new(
+        contract_addr.parse::<Address>()?.clone(),
+        Arc::new(client.clone()),
+    );
+
+    // 3. Send transaction that updates commitment
+    let tx = contract
+        .set_image_id(image_id_bytes)
         .gas(U256::from(50000)) // Gas
         .gas_price(U256::from(10_000_000_000u128)) // 10 Gwei - set experimentally. 1 Gwei is too little
         .send()
