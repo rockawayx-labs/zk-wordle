@@ -3,15 +3,16 @@
 use base64::decode;
 use bincode::deserialize;
 use risc0_zkvm::{serde::from_slice, sha::Digest, Receipt};
+use serde::Serialize;
 use wasm_bindgen::prelude::*;
 use wordle_core::GameState;
 
 #[wasm_bindgen(typescript_custom_section)]
 const TS_APPEND_CONTENT: &'static str = r#"
 export enum LetterFeedbackType {
-    Correct,
-    Present,
-    Miss,
+    Correct = "Correct",
+    Present = "Present",
+    Miss = "Miss",
 }
 export type VerifyResultType = { 
     success: false; 
@@ -27,16 +28,7 @@ export type VerifyResultType = {
 }
 "#;
 
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(typescript_type = "LetterFeedbackType")]
-    pub type LetterFeedbackType;
-    #[wasm_bindgen(typescript_type = "VerifyResultType")]
-    pub type VerifyResultType;
-}
-
-#[allow(dead_code)]
-#[wasm_bindgen]
+#[derive(Serialize)]
 pub struct VerifyResult {
     success: bool,
     error: String,
@@ -45,26 +37,35 @@ pub struct VerifyResult {
 
 pub struct VerifyResultBuilder;
 impl VerifyResultBuilder {
-    pub fn success(state: GameState) -> VerifyResult {
-        VerifyResult {
+    pub fn success(state: GameState) -> Result<String, JsValue> {
+        let result = VerifyResult {
             success: true,
             error: "".to_string(),
             state: Some(state),
+        };
+
+        match serde_json::to_string(&result) {
+            Ok(json) => Ok(json),
+            Err(e) => Err(JsValue::from_str(&e.to_string())),
         }
     }
 
-    pub fn failure(error: String) -> VerifyResult {
-        VerifyResult {
+    pub fn failure(error: String) -> Result<String, JsValue> {
+        let result = VerifyResult {
             success: false,
             error,
             state: None,
+        };
+        match serde_json::to_string(&result) {
+            Ok(json) => Ok(json),
+            Err(e) => Err(JsValue::from_str(&e.to_string())),
         }
     }
 }
 
 #[no_mangle]
 #[wasm_bindgen]
-pub fn verify_receipt(receipt_str: String) -> VerifyResult {
+pub fn verify_receipt(receipt_str: String) -> Result<String, JsValue> {
     let receipt = match deserialize_receipt(receipt_str) {
         Ok(r) => r,
         Err(e) => return VerifyResultBuilder::failure(e),
@@ -80,7 +81,11 @@ pub fn verify_receipt(receipt_str: String) -> VerifyResult {
     ]);
 
     match receipt.verify(&id) {
-        Ok(_) => VerifyResultBuilder::success(game_state),
+        Ok(_) => {
+            let result = VerifyResultBuilder::success(game_state);
+            println!("Result: {:?}", &result);
+            result
+        }
         Err(err) => VerifyResultBuilder::failure(err.to_string()),
     }
 }
