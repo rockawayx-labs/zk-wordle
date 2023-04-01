@@ -1,14 +1,12 @@
 #![no_main]
 
-use methods::WORDLE_ID;
 use risc0_zkvm::sha::Digest;
 use risc0_zkvm::Receipt;
 use wasm_bindgen::prelude::*;
-use web_sys::console;
 
 #[no_mangle]
 #[wasm_bindgen]
-pub fn verify_receipt_with(receipt_str: String) -> String {
+pub fn verify_receipt(receipt_str: String) -> String {
     let as_bytes = match base64::decode(receipt_str) {
         Ok(bytes) => bytes,
         Err(_) => return "Invalid base64".to_string(),
@@ -18,12 +16,11 @@ pub fn verify_receipt_with(receipt_str: String) -> String {
         Err(_) => return "Invalid receipt".to_string(),
     };
 
-    console::log_1(&format!("Receipt: {:?}", &receipt).into());
-
-    let id = Digest::from(WORDLE_ID);
-
-    console::log_1(&format!("ID: {:?}", &id).into());
-    console::log_1(&format!("Worlde ID: {:?}", &WORDLE_ID).into());
+    // TODO: move this to input parameter
+    let id = Digest::from([
+        269857112, 1358814123, 3810820780, 2766300945, 3087851643, 3544867356, 319472692,
+        4172190676,
+    ]);
 
     match receipt.verify(&id) {
         Ok(_) => "OK".to_string(),

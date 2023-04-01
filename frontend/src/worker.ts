@@ -1,4 +1,4 @@
-import init, { verify_receipt_with as verify } from "wasm-verifier";
+import init, { verify_receipt as verify } from "wasm-verifier";
 import wasm from "wasm-verifier/wasm_verifier_bg.wasm?url";
 
 export async function verifyReceipt(receipt: string) {

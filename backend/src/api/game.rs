@@ -1,17 +1,16 @@
-use crate::state::AppState;
+use methods::WORDLE_ELF;
 use actix_web::{post, web, Responder, Result};
-use ethers::providers::{Http, Provider};
-use ethers::{prelude::*, types::U256};
-use methods::{WORDLE_ELF, WORDLE_ID};
-use risc0_zkvm::sha::{Impl, Sha256};
+use ethers::{prelude::*, providers::{Http, Provider}, types::U256};
+use methods::WORDLE_ELF;
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
+    sha::{Impl, Sha256},
     Prover, Result as ZkvmResult,
 };
 use serde::{Deserialize, Serialize};
-use std::env;
-use std::sync::{Arc, Mutex};
+use std::{env, sync::{Arc, Mutex}};
 use wordle_core::GameState;
+use crate::state::AppState;
 
 // Add client type
 type Client = SignerMiddleware<Provider<Http>, Wallet<k256::ecdsa::SigningKey>>;
@@ -27,16 +26,6 @@ abigen!(
 #[derive(Deserialize)]
 pub struct GuessInput {
     guess: String,
-}
-
-#[derive(Deserialize)]
-pub struct CheckInput {
-    receipt: String,
-}
-
-#[derive(Serialize)]
-pub struct CheckOutput {
-    correct: bool,
 }
 
 #[derive(Serialize)]
@@ -89,28 +78,6 @@ pub async fn guess(
     Ok(web::Json(output))
 }
 
-#[post("/check")]
-pub async fn check(req_body: web::Json<CheckInput>) -> Result<impl Responder> {
-    let as_bytes = match base64::decode(&req_body.receipt) {
-        Ok(bytes) => bytes,
-        Err(_) => return Err(actix_web::error::ErrorInternalServerError("Invalid base64")),
-    };
-    let receipt = match bincode::deserialize::<risc0_zkvm::Receipt>(&as_bytes) {
-        Ok(receipt) => receipt,
-        Err(_) => {
-            return Err(actix_web::error::ErrorInternalServerError(
-                "Invalid receipt",
-            ))
-        }
-    };
-
-    let output = match receipt.verify(&WORDLE_ID) {
-        Ok(_) => CheckOutput { correct: true },
-        Err(_e) => CheckOutput { correct: false },
-    };
-
-    Ok(web::Json(output))
-}
 
 fn check_guess_proof(
     guess_word: String,
