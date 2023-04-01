@@ -1,7 +1,6 @@
-use methods::WORDLE_ELF;
 use actix_web::{post, web, Responder, Result};
 use ethers::{prelude::*, providers::{Http, Provider}, types::U256};
-use methods::WORDLE_ELF;
+use methods::{WORDLE_ELF, WORDLE_ID};
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
     sha::{Impl, Sha256},
@@ -66,6 +65,8 @@ pub async fn guess(
     data: web::Data<Mutex<AppState>>,
 ) -> Result<impl Responder> {
     let state = data.lock().unwrap();
+
+    println!("Correct ID: {:?}", &WORDLE_ID);
 
     let output = match check_guess_proof(
         req_body.guess.clone(),

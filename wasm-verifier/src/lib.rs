@@ -18,8 +18,7 @@ pub fn verify_receipt(receipt_str: String) -> String {
 
     // TODO: move this to input parameter
     let id = Digest::from([
-        269857112, 1358814123, 3810820780, 2766300945, 3087851643, 3544867356, 319472692,
-        4172190676,
+        719113331, 2384567050, 1972360988, 1439713833, 526468864, 546687298, 3259576037, 2517916990,
     ]);
 
     match receipt.verify(&id) {
