@@ -1,11 +1,11 @@
-use actix_web::{web, http, App, HttpServer};
-use actix_cors::Cors;
-use std::sync::Mutex;
 use crate::state::AppState;
+use actix_cors::Cors;
+use actix_web::{http, web, App, HttpServer};
+use std::sync::Mutex;
 
 mod api;
-mod wordlist;
 mod state;
+mod wordlist;
 
 const ALLOWED_ORIGIN: &str = "http://localhost:8080";
 
@@ -27,9 +27,9 @@ async fn main() -> std::io::Result<()> {
             .service(api::status::healthcheck)
             .service(api::game::init)
             .service(api::game::guess)
+            .service(api::game::image)
     })
     .bind(("127.0.0.1", 9000))?
     .run()
     .await
 }
-
