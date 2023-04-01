@@ -1,0 +1,14 @@
+[package]
+name = "methods-guest"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[build-dependencies]
+risc0-build = "0.14"
+
+[dependencies]
+risc0-zkp = { version = "0.14", default-features = false, features = ["std"] }
+risc0-zkvm = { version = "0.14", default-features = false, features = ["std"] }
+wordle-core = { path = "../../core" }

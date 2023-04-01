@@ -1,0 +1,12 @@
+[workspace]
+members = [
+  "core",
+  "methods",
+  "backend",
+  "wasm-verifier",
+]
+
+exclude = [
+  "frontend",
+  "contract"
+]

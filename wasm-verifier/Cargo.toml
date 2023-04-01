@@ -1,0 +1,12 @@
+[package]
+name = "wasm-verifier"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+risc0-zkp = { version = "0.14", default-features = false }
+risc0-zkvm = { version = "0.14", default-features = false }
+wasm-bindgen = "0.2.78"
