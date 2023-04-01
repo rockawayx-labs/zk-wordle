@@ -10,9 +10,11 @@ import {
 import { IconBrackets } from "@tabler/icons-react";
 import useStyles, { ICON_SIZE } from "./GameStats.styles";
 
-export interface GameStatsProps extends PaperProps {}
+export interface GameStatsProps extends PaperProps {
+  turn: number;
+}
 
-export function GameStats({ ...others }: GameStatsProps) {
+export function GameStats({ turn, ...others }: GameStatsProps) {
   const { classes } = useStyles();
 
   return (
@@ -39,11 +41,11 @@ export function GameStats({ ...others }: GameStatsProps) {
           Turn
         </Text>
         <Text fz="sm" color="dimmed">
-          0/5
+          {turn}/6
         </Text>
       </Group>
 
-      <Progress value={62} mt={5} />
+      <Progress value={(turn / 6) * 100} mt={5} />
     </Paper>
   );
 }

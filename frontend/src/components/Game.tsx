@@ -89,13 +89,11 @@ export function Game() {
 
   return (
     <Stack>
-      <GameStats mb="xl" />
-      {turns.map((feedback, i) => (
-        <RowResult key={i} feedback={feedback} />
-      ))}
+      <GameStats turn={turns.length} mb="xl" />
 
       {status === "lost" && (
         <Alert
+          fw={700}
           title="Game Over!"
           color="red"
           variant="filled"
@@ -107,6 +105,7 @@ export function Game() {
 
       {status === "won" && (
         <Alert
+          fw={700}
           title="Game Over!"
           color="teal"
           variant="filled"
@@ -115,6 +114,10 @@ export function Game() {
           You won!
         </Alert>
       )}
+
+      {turns.map((feedback, i) => (
+        <RowResult key={i} feedback={feedback} />
+      ))}
 
       <FormProvider form={form}>
         <form onSubmit={form.onSubmit(handleSubmit)}>
