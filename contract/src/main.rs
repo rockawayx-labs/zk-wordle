@@ -16,7 +16,7 @@ use std::sync::Arc;
 // Add client type
 type Client = SignerMiddleware<Provider<Http>, Wallet<k256::ecdsa::SigningKey>>;
 
-const CONTRACT_ADDRESS: &str = "0xbfeC2320Bf24A289d393932fB30998Ed5fa84C46";
+const CONTRACT_ADDRESS: &str = "0xd216FC36d49A07629619d5F6eE81F0F950EA62A9";
 const ALCHEMY_MUMBAI_API_KEY: &str =
     "https://polygon-mumbai.g.alchemy.com/v2/VDEtXZglGFw5AoR48KaAj-ngFWYUehMY";
 
