@@ -11,9 +11,9 @@ CONTRACT_ADDRESS = "0xd216FC36d49A07629619d5F6eE81F0F950EA62A9"
 
 [tasks.build]
 run_task = { name = [
-    "build-backend",
     "build-frontend",
-], fork = true, parallel = true }
+    "build-backend",
+], fork = true, parallel = false }
 
 [tasks.build-backend]
 cwd = "./backend/"
@@ -21,7 +21,7 @@ command = "cargo"
 args = ["build", "--release"]
 
 [tasks.build-frontend]
-dependencies = ["install-frontend", "build-wasm-verifier"]
+dependencies = ["build-wasm-verifier", "install-frontend"]
 cwd = "./frontend/"
 command = "yarn"
 args = ["build"]
@@ -47,7 +47,7 @@ command = "cargo"
 args = ["run", "--release"]
 
 [tasks.run-frontend]
-dependencies = ["install-frontend", "build-wasm-verifier"]
+dependencies = ["build-wasm-verifier", "install-frontend"]
 cwd = "./frontend/"
 command = "yarn"
 args = ["dev"]
