@@ -114,6 +114,11 @@ fn check_guess_proof(
     let game_state: GameState = from_slice(&receipt.journal).unwrap();
     let correct = game_state.feedback.game_is_won();
 
+    println!(
+        "game_state.correct_word_hash: {:?}",
+        &game_state.correct_word_hash
+    );
+
     Ok(GuessOutput {
         correct,
         receipt: base64::encode(bincode::serialize(&receipt).unwrap()),
