@@ -1,12 +1,16 @@
-use actix_web::{web, http, get, post, App, HttpServer, Responder, Result, HttpResponse};
-use actix_cors::Cors;
-use risc0_zkvm::{Receipt, Result as ZkvmResult, Prover, serde::{from_slice, to_vec}};
-use serde::{Deserialize, Serialize};
-use methods::WORDLE_ELF;
-use wordle_core::GameState;
-use std::sync::Mutex;
-use rand::{Rng, thread_rng};
 use crate::wordlist::words::pick_word;
+use actix_cors::Cors;
+use actix_web::{get, http, post, web, App, HttpResponse, HttpServer, Responder, Result};
+use methods::WORDLE_ELF;
+use rand::{thread_rng, Rng};
+use risc0_zkvm::{
+    serde::{from_slice, to_vec},
+    Prover, Receipt, Result as ZkvmResult,
+};
+use serde::{Deserialize, Serialize};
+use std::env;
+use std::sync::Mutex;
+use wordle_core::GameState;
 
 mod wordlist;
 
@@ -53,19 +57,28 @@ async fn init(data: web::Data<Mutex<AppState>>) -> Result<impl Responder> {
 }
 
 #[post("/guess")]
-async fn guess(req_body: web::Json<GuessInput>, data: web::Data<Mutex<AppState>>) -> Result<impl Responder> {
+async fn guess(
+    req_body: web::Json<GuessInput>,
+    data: web::Data<Mutex<AppState>>,
+) -> Result<impl Responder> {
     let state = data.lock().unwrap();
 
-    let output = match check_guess_proof(req_body.guess.clone(), state.word.clone(), state.salt.clone()) {
+    let output = match check_guess_proof(
+        req_body.guess.clone(),
+        state.word.clone(),
+        state.salt.clone(),
+    ) {
         Ok(output) => output,
-        Err(_e) => {
-            return Err(actix_web::error::ErrorInternalServerError("Proof failed"))
-        }
+        Err(_e) => return Err(actix_web::error::ErrorInternalServerError("Proof failed")),
     };
     Ok(web::Json(output))
 }
 
-fn check_guess_proof(guess_word: String, correct_word: String, salt: [u8; 32]) -> ZkvmResult<GuessOutput> {
+fn check_guess_proof(
+    guess_word: String,
+    correct_word: String,
+    salt: [u8; 32],
+) -> ZkvmResult<GuessOutput> {
     let mut prover = Prover::new(WORDLE_ELF).expect("failed to construct prover");
 
     println!("correct_word: {:?}", correct_word);
@@ -89,6 +102,9 @@ const ALLOWED_ORIGIN: &str = "http://localhost:8080";
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    let v = env::var("TEST_VAT").expect("$TEST_VAT is not set");
+    println!("v: {:?}", v);
+
     let data = web::Data::new(Mutex::new(AppState {
         salt: generate_salt(),
         word: String::from(pick_word()),
