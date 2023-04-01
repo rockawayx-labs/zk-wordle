@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+actix-cors = "0.6.4"
 actix-web = "4"
 hex = "0.4"
 methods = { path = "../methods" }
@@ -11,3 +12,4 @@ rand = "0.8"
 risc0-zkvm = "0.14"
 serde = { version = "1.0", features = ["derive"] }
 wordle-core = { path = "../core" }
+serde_json = "1.0.95"

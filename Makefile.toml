@@ -10,14 +10,14 @@ run_task = { name = [
     "build-backend",
     "build-wasm-verifier",
     "build-frontend",
-], fork = true, parallel = true }
+], fork = true, parallel = false }
 
 [tasks.build-release]
 run_task = { name = [
     "build-release-backend",
     "build-release-wasm-verifier",
-    "build-frontend",
-], fork = true, parallel = true }
+    "build-release-frontend",
+], fork = true, parallel = false }
 
 [tasks.run]
 dependencies = ["build"]
@@ -41,7 +41,7 @@ args = ["build", "--target", "web", "--out-dir", "../frontend/wasm-verifier"]
 [tasks.build-release-wasm-verifier]
 cwd = "./wasm-verifier/"
 command = "wasm-pack"
-args = ["build", "--target", "web", "--out-dir", "../frontend/wasm-verifier", "--release"]
+args = ["build", "--release", "--target", "web", "--out-dir", "../frontend/wasm-verifier"]
 
 [tasks.build-backend]
 cwd = "./backend/"
@@ -86,7 +86,7 @@ command = "yarn"
 args = ["dev"]
 
 [tasks.run-release-frontend]
-dependencies = ["build-frontend"]
+dependencies = ["build-release-frontend"]
 cwd = "./frontend/"
 command = "yarn"
 args = ["preview"]

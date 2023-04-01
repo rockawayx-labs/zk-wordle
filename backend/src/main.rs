@@ -1,8 +1,9 @@
-use actix_web::{web, get, post, App, HttpServer, Responder, Result, HttpResponse};
+use actix_web::{web, http, get, post, App, HttpServer, Responder, Result, HttpResponse};
+use actix_cors::Cors;
 use risc0_zkvm::{Receipt, Result as ZkvmResult, Prover, serde::{from_slice, to_vec}};
 use serde::{Deserialize, Serialize};
-use methods::{WORDLE_ELF};
-use wordle_core::{GameState};
+use methods::WORDLE_ELF;
+use wordle_core::GameState;
 use std::sync::Mutex;
 use rand::{Rng, thread_rng};
 use crate::wordlist::words::pick_word;
@@ -84,6 +85,8 @@ fn check_guess_proof(guess_word: String, correct_word: String, salt: [u8; 32]) -
     Ok(GuessOutput { correct, receipt })
 }
 
+const ALLOWED_ORIGIN: &str = "http://localhost:8080";
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let data = web::Data::new(Mutex::new(AppState {
@@ -92,15 +95,23 @@ async fn main() -> std::io::Result<()> {
     }));
 
     HttpServer::new(move || {
+        let cors = Cors::default()
+            .allowed_origin(ALLOWED_ORIGIN)
+            .allowed_methods(vec!["GET", "POST"])
+            .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
+            .allowed_header(http::header::CONTENT_TYPE)
+            .max_age(3600);
+
         App::new()
+            .wrap(cors)
             .app_data(web::Data::clone(&data))
             .service(guess)
             .service(init)
             .service(status)
     })
-        .bind(("127.0.0.1", 9000))?
-        .run()
-        .await
+    .bind(("127.0.0.1", 9000))?
+    .run()
+    .await
 }
 
 fn generate_salt() -> [u8; 32] {
