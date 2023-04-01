@@ -56,9 +56,15 @@ pub async fn init(data: web::Data<Mutex<AppState>>) -> Result<impl Responder> {
     let mut state = data.lock().unwrap();
     let default_state = AppState::default();
 
-    state.salt = default_state.salt;
-    state.word = default_state.word;
+    // state.salt = default_state.salt;
+    // state.word = default_state.word;
+    state.salt = [
+        185, 61, 22, 108, 251, 234, 69, 244, 181, 153, 255, 87, 153, 71, 179, 179, 132, 241, 120,
+        14, 8, 91, 37, 0, 139, 131, 189, 69, 186, 251, 21, 18,
+    ];
+    state.word = String::from("hello");
 
+    println!("default_state {:?}", default_state.salt);
     let hex_salt = hex::encode(state.salt);
 
     set_commitment_in_contract(&state.word, &hex_salt).await?;
@@ -86,6 +92,7 @@ pub async fn guess(
         Ok(output) => output,
         Err(_e) => return Err(actix_web::error::ErrorInternalServerError("Proof failed")),
     };
+
     Ok(web::Json(output))
 }
 
@@ -109,6 +116,16 @@ pub async fn check(req_body: web::Json<CheckInput>) -> Result<impl Responder> {
         Err(_e) => CheckOutput { correct: false },
     };
 
+    let journal = receipt.journal;
+    let hash = &journal[..16];
+    let seal = receipt.seal;
+
+    println!("journal: {:?}", journal);
+    println!("hash: {:?}", hash);
+
+    let hash_hashed = *Impl::hash_bytes(hash.clone());
+    println!("hash_hashed: {:?}", hash_hashed);
+
     Ok(web::Json(output))
 }
 
@@ -123,6 +140,7 @@ fn check_guess_proof(
 
     let hex_salt = hex::encode(salt);
     println!("hex_salt: {:?}", &hex_salt);
+    println!("hex_salt.as_bytes(): {:?}", &hex_salt.as_bytes());
 
     prover.add_input_u32_slice(to_vec(&correct_word).unwrap().as_slice());
     prover.add_input_u32_slice(to_vec(&guess_word).unwrap().as_slice());
@@ -131,6 +149,26 @@ fn check_guess_proof(
     let receipt = prover.run().unwrap();
 
     let game_state: GameState = from_slice(&receipt.journal).unwrap();
+    println!(
+        "game_state correct_word_hash: {:?}",
+        game_state.correct_word_hash.clone()
+    );
+
+    let commitment_from_contract =
+        "18a02257aae5066240506b35e0387230f4fdfaccdee7a51178fc753481e51ccd";
+
+    // parse game_state.correct_word_hash to string
+    let string_from_digest: String = game_state.correct_word_hash.clone().to_string();
+    println!("string_from_digest: {:?}", string_from_digest.clone());
+
+    println!("game_state feedback: {:?}", game_state.feedback.clone());
+
+    if commitment_from_contract == string_from_digest {
+        println!("s1 and s2 are equal");
+    } else {
+        println!("s1 and s2 are not equal");
+    }
+
     let correct = game_state.feedback.game_is_won();
 
     Ok(GuessOutput {
@@ -170,7 +208,7 @@ async fn set_commitment_in_contract(
         .await?
         .await?;
 
-    println!("\nTransaction Receipt: {}", serde_json::to_string(&tx)?);
+    println!("\nTransaction Receipt: {}\n", serde_json::to_string(&tx)?);
 
     Ok(())
 }
