@@ -1,5 +1,5 @@
 import init, { verify_receipt_with as verify } from "wasm-verifier";
-import wasm from "wasm-verifier/wasm_verifier.wasm?url";
+import wasm from "wasm-verifier/wasm_verifier_bg.wasm?url";
 
 export async function verifyReceipt(receipt: string) {
   await init(wasm);

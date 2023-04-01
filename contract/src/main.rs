@@ -16,16 +16,17 @@ use std::sync::Arc;
 // Add client type
 type Client = SignerMiddleware<Provider<Http>, Wallet<k256::ecdsa::SigningKey>>;
 
-const CONTRACT_ADDRESS: &str = "0xbfeC2320Bf24A289d393932fB30998Ed5fa84C46";
+const CONTRACT_ADDRESS: &str = "0xd216FC36d49A07629619d5F6eE81F0F950EA62A9";
 const ALCHEMY_MUMBAI_API_KEY: &str =
     "https://polygon-mumbai.g.alchemy.com/v2/VDEtXZglGFw5AoR48KaAj-ngFWYUehMY";
 
 // ---> DO NOT USE THIS ACCOUNT ON MAINNET OR IN PUBLIC REPO !!!
-const OWNER_PRIVATE_KEY: &str = "6aea615c3d873b52514bed23b33011ffea8d1e99a242fa3d459b24dc21c93f3d"; 
-const OWNER_ADDRESS: &str = "0x6c29233170269A10283c15ee2dFbB2d70Ba4E5B7"; 
+const OWNER_PRIVATE_KEY: &str = "6aea615c3d873b52514bed23b33011ffea8d1e99a242fa3d459b24dc21c93f3d";
+const OWNER_ADDRESS: &str = "0x6c29233170269A10283c15ee2dFbB2d70Ba4E5B7";
 
 // Generates a type-safe interface for the Wordle smart contract
-// Getters are set automatically for public variables, like commitment is (meaning you won't find commitment() getter in Wordle.sol)
+// Getters are set automatically for public variables, like commitment is
+// (meaning you won't find commitment() getter in Wordle.sol)
 abigen!(
     WordleContract,
     r"[
@@ -112,7 +113,7 @@ async fn set_commitment(
     // 2. Compute commitment
     let commitment_hex = digest(word.to_string() + &salt_hex);
     let commitment_vec = hex::decode(&commitment_hex).unwrap();
-    let commitment_bytes: [u8; 32] = commitment_vec.try_into().unwrap(); 
+    let commitment_bytes: [u8; 32] = commitment_vec.try_into().unwrap();
 
     println!("word: {}", word);
     println!("salt: {}", salt_hex);
