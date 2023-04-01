@@ -89,4 +89,5 @@ args = ["dev"]
 dependencies = ["build-release-frontend"]
 cwd = "./frontend/"
 command = "yarn"
-args = ["preview"]
+args = ["dev"]
+# args = ["preview"] # TODO: uncomment this after testing

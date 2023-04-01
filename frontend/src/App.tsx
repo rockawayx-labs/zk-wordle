@@ -5,10 +5,57 @@ import "./App.css";
 
 function App() {
   const [count, setCount] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const handleFetchWithProxy = async () => {
     const response = await fetch("/api/healthcheck");
     console.log(await response.text());
+  };
+
+  const handleTryWorker = async () => {
+    setLoading(true);
+    const guessResponse = await fetch("/api/guess", {
+      method: "POST",
+      body: JSON.stringify({ guess: "adept" }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const { receipt } = await guessResponse.json();
+
+    const rsWorker = new Worker(new URL("./worker.ts", import.meta.url), {
+      type: "module",
+    });
+
+    rsWorker.postMessage(receipt);
+    rsWorker.onmessage = (e) => {
+      console.log(e);
+      setLoading(false);
+      rsWorker.terminate();
+    };
+  };
+
+  const handleTryCheck = async () => {
+    setLoading(true);
+    const guessResponse = await fetch("/api/guess", {
+      method: "POST",
+      body: JSON.stringify({ guess: "adept" }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const { receipt } = await guessResponse.json();
+
+    const checkResponse = await fetch("/api/check", {
+      method: "POST",
+      body: JSON.stringify({ receipt }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log(await checkResponse.json());
+    setLoading(false);
   };
 
   return (
@@ -21,12 +68,14 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Vite + React</h1>
+      <h1>{loading ? "Loading" : "Stale"}</h1>
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
         <button onClick={handleFetchWithProxy}>fetch with proxy</button>
+        <button onClick={handleTryWorker}>try worker</button>
+        <button onClick={handleTryCheck}>try check</button>
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>

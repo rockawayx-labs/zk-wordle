@@ -27,6 +27,7 @@ async fn main() -> std::io::Result<()> {
             .service(api::status::healthcheck)
             .service(api::game::init)
             .service(api::game::guess)
+            .service(api::game::check)
     })
     .bind(("127.0.0.1", 9000))?
     .run()
