@@ -12,64 +12,13 @@ CONTRACT_ADDRESS = "0xd216FC36d49A07629619d5F6eE81F0F950EA62A9"
 [tasks.build]
 run_task = { name = [
     "build-backend",
-    "build-wasm-verifier",
     "build-frontend",
-], fork = true, parallel = false }
-
-[tasks.build-release]
-run_task = { name = [
-    "build-release-backend",
-    "build-release-wasm-verifier",
-    "build-release-frontend",
-], fork = true, parallel = false }
-
-[tasks.run]
-dependencies = ["build"]
-run_task = { name = [
-    "run-backend",
-    "run-frontend",
 ], fork = true, parallel = true }
-
-[tasks.run-release]
-dependencies = ["build-release"]
-run_task = { name = [
-  "run-release-backend",
-  "run-release-frontend",
-], fork = true, parallel = true }
-
-[tasks.build-wasm-verifier]
-cwd = "./wasm-verifier/"
-command = "wasm-pack"
-args = ["build", "--target", "web", "--out-dir", "../frontend/wasm-verifier"]
-
-[tasks.build-release-wasm-verifier]
-cwd = "./wasm-verifier/"
-command = "wasm-pack"
-args = ["build", "--release", "--target", "web", "--out-dir", "../frontend/wasm-verifier"]
 
 [tasks.build-backend]
 cwd = "./backend/"
 command = "cargo"
-args = ["build"] # TODO: update backend tasks
-
-[tasks.build-release-backend]
-cwd = "./backend/"
-command = "cargo"
-args = ["build", "--release"] # TODO: update backend tasks
-
-[tasks.run-backend]
-cwd = "./backend/"
-command = "cargo"
-args = ["run"] # TODO: update backend tasks
-
-[tasks.run-release-backend]
-cwd = "./backend/"
-command = "cargo"
-args = ["run", "--release"] # TODO: update backend tasks
-
-[tasks.install-frontend]
-cwd = "./frontend/"
-command = "yarn"
+args = ["build", "--release"]
 
 [tasks.build-frontend]
 dependencies = ["install-frontend", "build-wasm-verifier"]
@@ -77,21 +26,28 @@ cwd = "./frontend/"
 command = "yarn"
 args = ["build"]
 
-[tasks.build-release-frontend]
-dependencies = ["install-frontend", "build-release-wasm-verifier"]
+[tasks.build-wasm-verifier]
+cwd = "./wasm-verifier/"
+command = "wasm-pack"
+args = ["build", "--release", "--target", "web", "--out-dir", "../frontend/wasm-verifier"]
+
+[tasks.install-frontend]
 cwd = "./frontend/"
 command = "yarn"
-args = ["build"]
+
+[tasks.run]
+run_task = { name = [
+    "run-backend",
+    "run-frontend",
+], fork = true, parallel = true }
+
+[tasks.run-backend]
+cwd = "./backend/"
+command = "cargo"
+args = ["run", "--release"]
 
 [tasks.run-frontend]
-dependencies = ["build-frontend"]
+dependencies = ["install-frontend", "build-wasm-verifier"]
 cwd = "./frontend/"
 command = "yarn"
 args = ["dev"]
-
-[tasks.run-release-frontend]
-dependencies = ["build-release-frontend"]
-cwd = "./frontend/"
-command = "yarn"
-args = ["dev"]
-# args = ["preview"] # TODO: uncomment this after testing
