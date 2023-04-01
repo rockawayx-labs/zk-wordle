@@ -10,7 +10,7 @@ export class Verifier {
   }
 
   public async verify(receipt: string) {
-    return new Promise((resolve, reject) => {
+    return new Promise<VerifyResultType>((resolve, reject) => {
       // Set up a listener for the worker thread's response
       this.worker.onmessage = (event) => {
         try {

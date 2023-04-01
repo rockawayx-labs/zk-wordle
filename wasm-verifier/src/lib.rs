@@ -9,11 +9,8 @@ use wordle_core::GameState;
 
 #[wasm_bindgen(typescript_custom_section)]
 const TS_APPEND_CONTENT: &'static str = r#"
-export enum LetterFeedbackType {
-    Correct = "Correct",
-    Present = "Present",
-    Miss = "Miss",
-}
+export type LetterFeedbackType = "Correct" | "Present" | "Miss";
+
 export type VerifyResultType = { 
     success: false; 
     error: string; 
