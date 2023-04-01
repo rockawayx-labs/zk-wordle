@@ -2,7 +2,7 @@ use crate::state::AppState;
 use actix_web::{post, web, Responder, Result};
 use ethers::providers::{Http, Provider};
 use ethers::{prelude::*, types::U256};
-use methods::WORDLE_ELF;
+use methods::{WORDLE_ELF, WORDLE_ID};
 use risc0_zkvm::sha::{Impl, Sha256};
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
@@ -27,6 +27,16 @@ abigen!(
 #[derive(Deserialize)]
 pub struct GuessInput {
     guess: String,
+}
+
+#[derive(Deserialize)]
+pub struct CheckInput {
+    receipt: String,
+}
+
+#[derive(Serialize)]
+pub struct CheckOutput {
+    correct: bool,
 }
 
 #[derive(Serialize)]
@@ -76,6 +86,29 @@ pub async fn guess(
         Ok(output) => output,
         Err(_e) => return Err(actix_web::error::ErrorInternalServerError("Proof failed")),
     };
+    Ok(web::Json(output))
+}
+
+#[post("/check")]
+pub async fn check(req_body: web::Json<CheckInput>) -> Result<impl Responder> {
+    let as_bytes = match base64::decode(&req_body.receipt) {
+        Ok(bytes) => bytes,
+        Err(_) => return Err(actix_web::error::ErrorInternalServerError("Invalid base64")),
+    };
+    let receipt = match bincode::deserialize::<risc0_zkvm::Receipt>(&as_bytes) {
+        Ok(receipt) => receipt,
+        Err(_) => {
+            return Err(actix_web::error::ErrorInternalServerError(
+                "Invalid receipt",
+            ))
+        }
+    };
+
+    let output = match receipt.verify(&WORDLE_ID) {
+        Ok(_) => CheckOutput { correct: true },
+        Err(_e) => CheckOutput { correct: false },
+    };
+
     Ok(web::Json(output))
 }
 

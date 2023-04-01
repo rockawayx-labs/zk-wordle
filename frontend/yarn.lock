@@ -704,7 +704,7 @@ vite@^4.2.0:
   optionalDependencies:
     fsevents "~2.3.2"
 
-"wasm-verifier@file:wasm-verifier":
+wasm-verifier@./wasm-verifier:
   version "0.1.0"
 
 yallist@^3.0.2:
