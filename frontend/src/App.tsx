@@ -1,11 +1,65 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { ethers } from "ethers";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 
+const CONTRACT_ADDRESS = "0x307B04Fd818eD3620847cE88fAfa73b80e090E79";
+const CONTRACT_ABI = [
+  {
+    inputs: [],
+    name: "commitment",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "imageId",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+];
+
 function App() {
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [commitment, setCommitment] = useState('');
+  const [imageId, setImageId] = useState('');
+
+  useEffect(() => {
+    async function init() {
+      const provider = ethers.getDefaultProvider(
+        `https://polygon-mumbai.g.alchemy.com/v2/${import.meta.env.VITE_ALCHEMY_MUMBAI_API_KEY}`
+      );
+      const contract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        CONTRACT_ABI,
+        provider
+      );
+      const commitmentResp = await contract.commitment();
+      const imageIdResp = await contract.imageId();
+      console.log({commitmentResp, imageIdResp});
+
+      setCommitment(commitmentResp);
+      setImageId(imageIdResp);
+    }
+
+    init();
+  }, []);
 
   const handleFetchWithProxy = async () => {
     const response = await fetch("/api/healthcheck");
