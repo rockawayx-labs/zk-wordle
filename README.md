@@ -1,7 +1,10 @@
-# ZKHack Lisbon RockawayX
-![zk-wordle-schema](https://user-images.githubusercontent.com/44506010/229330943-85b96ec2-a846-4e8b-8356-67a279b34207.png)
+# ZK WORDLE 
 
-## Structure
+The app is deployed here: [http://161.35.160.141:8080](http://161.35.160.141:8080/)  
+
+![screenshot-zk-wordle](https://user-images.githubusercontent.com/44506010/229332289-2d0a762e-380b-42ac-8fba-32690e533fd1.png)
+
+## Project Structure
 
 This is a multi-package workspace (see definition in [`Cargo.toml`](Cargo.toml)).
 
@@ -60,3 +63,8 @@ docker run -d -p 8080:8080 zk-wordle
 ```
 
 You can now access the app at http://localhost:8080
+
+
+## System architecture
+![zk-wordle-schema](https://user-images.githubusercontent.com/44506010/229330943-85b96ec2-a846-4e8b-8356-67a279b34207.png)
+
