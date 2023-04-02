@@ -1,4 +1,5 @@
 import { Box, Button, Group, LoadingOverlay, Tooltip } from "@mantine/core";
+import { useLocalStorage } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
 import { Icon24Hours } from "@tabler/icons-react";
 import { useState } from "react";
@@ -8,6 +9,10 @@ import useStyles from "./AdminPanel.styles";
 export function AdminPanel() {
   const { classes } = useStyles();
   const [loading, setLoading] = useState(false);
+  const [admin] = useLocalStorage({
+    key: "admin",
+    defaultValue: false,
+  });
 
   const handleInit = async () => {
     setLoading(true);
@@ -65,6 +70,10 @@ export function AdminPanel() {
       setLoading(false);
     }
   };
+
+  if (!admin) {
+    return null;
+  }
 
   return (
     <>
