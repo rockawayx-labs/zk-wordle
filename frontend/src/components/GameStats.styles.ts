@@ -20,4 +20,8 @@ export default createStyles((theme) => ({
     fontFamily: `Greycliff CF, ${theme.fontFamily}`,
     lineHeight: 1,
   },
+
+  breakAll: {
+    wordBreak: "break-all",
+  },
 }));

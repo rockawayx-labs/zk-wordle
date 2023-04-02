@@ -14,6 +14,7 @@ import { Verifier } from "../verifier";
 import { GameStats } from "./GameStats";
 import { Row } from "./Row";
 import { RowResult } from "./RowResult";
+import type { ContractData } from "../App";
 
 type Feedback = [
   [string, LetterFeedbackType],
@@ -23,7 +24,11 @@ type Feedback = [
   [string, LetterFeedbackType]
 ];
 
-export function Game() {
+interface GameProps {
+  contractData?: ContractData;
+}
+
+export function Game({ contractData }: GameProps) {
   const form = useForm({
     initialValues: {
       first: "",
@@ -45,10 +50,18 @@ export function Game() {
   const [turns, setTurns] = useState<Feedback[]>([]);
 
   const handleSubmit = async (formValues: WordleFormValues) => {
+    if (!contractData) {
+      showNotification({
+        title: "Not ready",
+        message: "Contract data is not loaded",
+        color: "orange",
+      });
+      return;
+    }
     setLoading(true);
     try {
       const chars = objectKeys(formValues).map((key) => formValues[key]);
-      const word = chars.join("");
+      const word = chars.join("").toLowerCase();
 
       const guessResponse = await fetch("/api/guess", {
         method: "POST",
@@ -89,7 +102,12 @@ export function Game() {
 
   return (
     <Stack>
-      <GameStats turn={turns.length} mb="xl" />
+      <GameStats
+        commitment={contractData?.commitment}
+        imageId={contractData?.imageId}
+        turn={turns.length}
+        mb="xl"
+      />
 
       {status === "lost" && (
         <Alert

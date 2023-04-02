@@ -39,18 +39,8 @@ See the [`Makefile.toml`](Makefile.toml) for list of all available tasks.
 cargo make build
 ```
 
-You can also use `cargo make build-release` for release version.
-
 ### Run
 
 ```bash
 cargo make run
-```
-
-You can also use `cargo make run-release` to run the release version.
-
-### Clean
-
-```bash
-cargo make clean
 ```
