@@ -1,0 +1,5 @@
+dist/
+frontend/dist/
+frontend/node_modules/
+frontend/wasm-verifier/
+target/

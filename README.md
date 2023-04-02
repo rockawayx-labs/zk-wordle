@@ -44,3 +44,18 @@ cargo make build
 ```bash
 cargo make run
 ```
+
+## Docker
+The easiest way to run the project is to use Docker.
+
+First, build the image:
+```
+docker build -t zk-wordle .
+```
+
+Then, run it:
+```
+docker run -d -p 8080:8080 zk-wordle
+```
+
+You can now access the app at http://localhost:8080
