@@ -6,6 +6,7 @@ import { Footer } from "./components/Footer";
 import { Game } from "./components/Game";
 import { CONTRACT_ABI, CONTRACT_ADDRESS, PROVIDER_API_KEY } from "./constants";
 import { extractErrorMessage } from "./utils";
+import { AdminPanel } from "./components/AdminPanel";
 
 export interface ContractData {
   commitment: string;
@@ -39,11 +40,14 @@ function App() {
   }, []);
 
   return (
-    <Container py="4rem" size="xs">
-      <LoadingOverlay visible={!contractData} />
-      <Game contractData={contractData} />
-      <Footer />
-    </Container>
+    <main>
+      <AdminPanel />
+      <Container py="4rem" size="xs">
+        <LoadingOverlay visible={!contractData} />
+        <Game contractData={contractData} />
+        <Footer />
+      </Container>
+    </main>
   );
 }
 

@@ -73,7 +73,11 @@ export function Game({ contractData }: GameProps) {
       const { receipt } = await guessResponse.json();
 
       const verifier = new Verifier();
-      const data = await verifier.verify(receipt);
+      const data = await verifier.verify(
+        receipt,
+        contractData.imageId,
+        contractData.commitment
+      );
       if (!data.success) {
         throw new Error(data.error);
       }

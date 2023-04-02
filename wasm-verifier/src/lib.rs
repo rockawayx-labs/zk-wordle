@@ -5,7 +5,7 @@ use bincode::deserialize;
 use risc0_zkvm::{serde::from_slice, sha::Digest, Receipt};
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
-use wordle_core::GameState;
+use wordle_core::{GameState, WordFeedback};
 
 #[wasm_bindgen(typescript_custom_section)]
 const TS_APPEND_CONTENT: &'static str = r#"
@@ -29,7 +29,13 @@ export type VerifyResultType = {
 pub struct VerifyResult {
     success: bool,
     error: String,
-    state: Option<GameState>,
+    state: Option<VerifyResultState>,
+}
+
+#[derive(Serialize)]
+pub struct VerifyResultState {
+    correct_word_hash: String,
+    feedback: WordFeedback,
 }
 
 pub struct VerifyResultBuilder;
@@ -38,7 +44,10 @@ impl VerifyResultBuilder {
         let result = VerifyResult {
             success: true,
             error: "".to_string(),
-            state: Some(state),
+            state: Some(VerifyResultState {
+                correct_word_hash: state.correct_word_hash.to_string(),
+                feedback: state.feedback,
+            }),
         };
 
         match serde_json::to_string(&result) {
@@ -62,7 +71,11 @@ impl VerifyResultBuilder {
 
 #[no_mangle]
 #[wasm_bindgen]
-pub fn verify_receipt(receipt_str: String) -> Result<String, JsValue> {
+pub fn verify_receipt(
+    receipt_str: String,
+    contract_image_id: String,
+    contract_word_commitment: String,
+) -> Result<String, JsValue> {
     let receipt = match deserialize_receipt(receipt_str) {
         Ok(r) => r,
         Err(e) => return VerifyResultBuilder::failure(e),
