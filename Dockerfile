@@ -32,7 +32,7 @@ RUN cargo make build
 FROM debian:bullseye-slim
 
 RUN apt-get update && \
-    apt-get install -y nginx-light && \
+    apt-get install -y nginx-light ca-certificates && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
