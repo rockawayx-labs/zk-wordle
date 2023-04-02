@@ -9,7 +9,11 @@ export class Verifier {
     });
   }
 
-  public async verify(receipt: string) {
+  public async verify(
+    receipt: string,
+    imageIdCommitment: string,
+    wordCommitment: string
+  ) {
     return new Promise<VerifyResultType>((resolve, reject) => {
       // Set up a listener for the worker thread's response
       this.worker.onmessage = (event) => {
@@ -26,7 +30,7 @@ export class Verifier {
         reject(event.error);
       };
 
-      this.worker.postMessage(receipt);
+      this.worker.postMessage([receipt, imageIdCommitment, wordCommitment]);
     });
   }
 }

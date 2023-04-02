@@ -2,7 +2,7 @@ import { Alert, Button, Stack } from "@mantine/core";
 import { matches } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { IconMoodSad, IconMoodTongueWink } from "@tabler/icons-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LetterFeedbackType } from "wasm-verifier";
 import {
   FormProvider,
@@ -14,6 +14,38 @@ import { Verifier } from "../verifier";
 import { GameStats } from "./GameStats";
 import { Row } from "./Row";
 import { RowResult } from "./RowResult";
+import { ethers } from "ethers";
+
+const PROVIDER_API_KEY = "VDEtXZglGFw5AoR48KaAj-ngFWYUehMY";
+const CONTRACT_ADDRESS = "0x307B04Fd818eD3620847cE88fAfa73b80e090E79";
+const CONTRACT_ABI = [
+  {
+    inputs: [],
+    name: "commitment",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "imageId",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+];
 
 type Feedback = [
   [string, LetterFeedbackType],
@@ -43,6 +75,29 @@ export function Game() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"playing" | "lost" | "won">("playing");
   const [turns, setTurns] = useState<Feedback[]>([]);
+  const [commitment, setCommitment] = useState("");
+  const [imageId, setImageId] = useState("");
+
+  useEffect(() => {
+    async function init() {
+      const provider = ethers.getDefaultProvider(
+        `https://polygon-mumbai.g.alchemy.com/v2/${PROVIDER_API_KEY}`
+      );
+      const contract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        CONTRACT_ABI,
+        provider
+      );
+      const commitmentResp = await contract.commitment();
+      const imageIdResp = await contract.imageId();
+      console.log({ commitmentResp, imageIdResp });
+
+      setCommitment(commitmentResp);
+      setImageId(imageIdResp);
+    }
+
+    init();
+  }, []);
 
   const handleSubmit = async (formValues: WordleFormValues) => {
     setLoading(true);
@@ -60,7 +115,9 @@ export function Game() {
       const { receipt } = await guessResponse.json();
 
       const verifier = new Verifier();
-      const data = await verifier.verify(receipt);
+      // const data = await verifier.verify(receipt);
+      const data = await verifier.verify(receipt, imageId, commitment);
+      console.log("data", data);
       if (!data.success) {
         throw new Error(data.error);
       }
