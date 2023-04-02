@@ -1,4 +1,5 @@
 # ZKHack Lisbon RockawayX
+![zk-wordle-schema](https://user-images.githubusercontent.com/44506010/229330943-85b96ec2-a846-4e8b-8356-67a279b34207.png)
 
 ## Structure
 
