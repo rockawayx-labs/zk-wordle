@@ -75,6 +75,7 @@ pub async fn guess(
     let state = data.lock().unwrap();
 
     println!("Correct ID: {:?}", &WORDLE_ID);
+    println!("Correct Digest: {:?}", Digest::from(WORDLE_ID));
 
     let output = match check_guess_proof(
         req_body.guess.clone(),

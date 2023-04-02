@@ -82,7 +82,7 @@ export function Game({ contractData }: GameProps) {
         throw new Error(data.error);
       }
       const feedback = chars
-        .map((char, i) => [char, data.state.feedback[i] || "Miss"])
+        .map((char, i) => [char, data.feedback[i] || "Miss"])
         .slice(0, 5) as Feedback;
       setTurns((turns) => [...turns, feedback]);
 

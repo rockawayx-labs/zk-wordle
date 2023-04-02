@@ -27,7 +27,7 @@ export class Verifier {
         reject(event.error);
       };
 
-      this.worker.postMessage([receipt, imageId, commitment]);
+      this.worker.postMessage([receipt, imageId.slice(2), commitment.slice(2)]);
     });
   }
 }

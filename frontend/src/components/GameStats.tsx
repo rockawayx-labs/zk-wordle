@@ -57,7 +57,7 @@ export function GameStats({
             rel="noopener noreferrer"
             target="_blank"
           >
-            View on Etherscan
+            View on PolygonScan
           </Anchor>
         </Group>
 

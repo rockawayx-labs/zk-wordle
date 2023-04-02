@@ -14,14 +14,11 @@ export type LetterFeedbackType = "Correct" | "Present" | "Miss";
 export type VerifyResultType = { 
     success: false; 
     error: string; 
-    state: undefined;
+    feedback: undefined;
 } | { 
     success: true; 
     error: ""; 
-    state: {
-        correct_word_hash: string;
-        feedback: LetterFeedbackType[];
-    };
+    feedback: LetterFeedbackType[];
 }
 "#;
 
@@ -29,13 +26,7 @@ export type VerifyResultType = {
 pub struct VerifyResult {
     success: bool,
     error: String,
-    state: Option<VerifyResultState>,
-}
-
-#[derive(Serialize)]
-pub struct VerifyResultState {
-    correct_word_hash: String,
-    feedback: WordFeedback,
+    feedback: Option<WordFeedback>,
 }
 
 pub struct VerifyResultBuilder;
@@ -44,10 +35,7 @@ impl VerifyResultBuilder {
         let result = VerifyResult {
             success: true,
             error: "".to_string(),
-            state: Some(VerifyResultState {
-                correct_word_hash: state.correct_word_hash.to_string(),
-                feedback: state.feedback,
-            }),
+            feedback: Some(state.feedback),
         };
 
         match serde_json::to_string(&result) {
@@ -60,7 +48,7 @@ impl VerifyResultBuilder {
         let result = VerifyResult {
             success: false,
             error,
-            state: None,
+            feedback: None,
         };
         match serde_json::to_string(&result) {
             Ok(json) => Ok(json),
@@ -85,10 +73,34 @@ pub fn verify_receipt(
         Err(e) => return VerifyResultBuilder::failure(e),
     };
 
+    if game_state.correct_word_hash.to_string() != contract_word_commitment {
+        return VerifyResultBuilder::failure(format!(
+            "Word commitment mismatch: {contract_word_commitment} != {}",
+            game_state.correct_word_hash
+        ));
+    }
+
     // TODO: move this to input parameter
-    let id = Digest::from([
-        719113331, 2384567050, 1972360988, 1439713833, 526468864, 546687298, 3259576037, 2517916990,
-    ]);
+    // let id = Digest::from([
+    //     719113331, 2384567050, 1972360988, 1439713833, 526468864, 546687298,
+    // 3259576037, 2517916990, ]);
+
+    let id_vec = match hex::decode(contract_image_id) {
+        Ok(vec) => vec,
+        Err(e) => {
+            return VerifyResultBuilder::failure(format!("Error decoding contract image id: {e}"))
+        }
+    };
+    let id_bytes: [u8; 32] = match id_vec.try_into() {
+        Ok(bytes) => bytes,
+        Err(e) => {
+            return VerifyResultBuilder::failure(format!(
+                "Error converting contract image id to bytes: {:?}",
+                e
+            ))
+        }
+    };
+    let id = Digest::from(id_bytes);
 
     match receipt.verify(&id) {
         Ok(_) => {
@@ -96,7 +108,7 @@ pub fn verify_receipt(
             println!("Result: {:?}", &result);
             result
         }
-        Err(err) => VerifyResultBuilder::failure(err.to_string()),
+        Err(err) => VerifyResultBuilder::failure(format!("Error: {err}, trying to verify id {id}")),
     }
 }
 
