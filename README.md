@@ -1,6 +1,6 @@
 # ZK WORDLE 
 
-The app is deployed here: [http://161.35.160.141:8080](http://161.35.160.141:8080/)
+The app is deployed here: [http://zkwordle.rockawayx.com](http://zkwordle.rockawayx.com)
 
 https://user-images.githubusercontent.com/16494885/229332386-daa3f54a-4090-4000-9389-19ffb6c92690.mov
 
