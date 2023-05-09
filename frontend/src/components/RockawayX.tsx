@@ -1,15 +1,21 @@
-import type { ComponentPropsWithoutRef } from "react";
+import { Box } from "@mantine/core";
+import type { BoxProps } from "@mantine/core";
 
-export interface RockawayXProps extends ComponentPropsWithoutRef<"svg"> {}
+export interface RockawayXProps extends BoxProps {
+  size?: number;
+}
 
-export function RockawayX(props: RockawayXProps) {
+export function RockawayX({ size = 100, ...others }: RockawayXProps) {
   return (
-    <svg
-      width="200"
-      height="31"
-      viewBox="0 0 844 130"
+    <Box
+      component="svg"
       xmlns="http://www.w3.org/2000/svg"
-      {...props}
+      width={size}
+      height={size * (31 / 200)}
+      viewBox="0 0 844 130"
+      xmlSpace="preserve"
+      fill="none"
+      {...others}
     >
       <g fillRule="nonzero" fill="none">
         <path
@@ -21,6 +27,6 @@ export function RockawayX(props: RockawayXProps) {
           d="m843.44 0-43.33 29.63v10.32l43.33 29.52V52.06l-25.93-17.37 25.93-17.28zM750.58 17.41l25.94 17.28-25.94 17.37v17.41l43.34-29.52V29.63L750.58 0z"
         ></path>
       </g>
-    </svg>
+    </Box>
   );
 }
