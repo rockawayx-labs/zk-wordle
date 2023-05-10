@@ -37,39 +37,39 @@ export function GameStats({
       {...others}
     >
       <ThemeIcon className={classes.icon} size={ICON_SIZE} radius={ICON_SIZE}>
-        <IconBrackets size="2rem" stroke={1.5} />
+        <IconBrackets size="1.5rem" stroke={1.5} />
       </ThemeIcon>
 
       <Title ta="center" fw={700} className={classes.title}>
         ZK Wordle Challenge
       </Title>
-      <Title order={2} c="dimmed" ta="center">
+      <Title order={2} c="dimmed" ta="center" className={classes.subTitle}>
         That is verifiably fair
       </Title>
 
       <Card mt="xl" withBorder>
-        <Group position="apart">
-          <Title order={3}>Contract</Title>
+        <Stack spacing={0}>
+          <Text fw={700}>Contract address</Text>
           <Anchor
-            size="xs"
+            size="sm"
             fw={700}
             href={`https://mumbai.polygonscan.com/address/${CONTRACT_ADDRESS}`}
             rel="noopener noreferrer"
             target="_blank"
           >
-            View on PolygonScan
+            {CONTRACT_ADDRESS}
           </Anchor>
-        </Group>
+        </Stack>
 
-        <Stack mt="md" spacing="xs">
-          <Text fw={700}>Commitment</Text>
+        <Stack mt="md" spacing={0}>
+          <Text fw={700}>Commitment to the guessed word</Text>
           <Text fz="sm" color="dimmed" className={classes.breakAll}>
             {commitment ?? "N/A"}
           </Text>
         </Stack>
 
-        <Stack mt="md" spacing="xs">
-          <Text fw={700}>Image ID</Text>
+        <Stack mt="md" spacing={0}>
+          <Text fw={700}>Prover image ID</Text>
           <Text fz="sm" color="dimmed" className={classes.breakAll}>
             {imageId ?? "N/A"}
           </Text>

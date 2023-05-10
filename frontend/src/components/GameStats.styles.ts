@@ -1,13 +1,13 @@
 import { createStyles, rem } from "@mantine/core";
 
-export const ICON_SIZE = rem(60);
+export const ICON_SIZE = rem(40);
 
 export default createStyles((theme) => ({
   card: {
     position: "relative",
     overflow: "visible",
     padding: theme.spacing.xl,
-    paddingTop: `calc(${theme.spacing.xl} * 1.5 + ${ICON_SIZE} / 3)`,
+    paddingTop: `calc(${theme.spacing.md} * 1.5 + ${ICON_SIZE} / 3)`,
   },
 
   icon: {
@@ -18,9 +18,12 @@ export default createStyles((theme) => ({
 
   title: {
     fontFamily: `Greycliff CF, ${theme.fontFamily}`,
-    lineHeight: 1,
+    lineHeight: 1.5,
+    fontSize: '1.8rem'
   },
-
+  subTitle: {
+    fontSize: '1.2rem'
+  },
   breakAll: {
     wordBreak: "break-all",
   },

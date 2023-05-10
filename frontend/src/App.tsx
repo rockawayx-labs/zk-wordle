@@ -42,7 +42,7 @@ function App() {
   return (
     <main>
       <AdminPanel />
-      <Container py="4rem" size="xs">
+      <Container py="2.5rem" size="xs">
         <LoadingOverlay visible={!contractData} />
         <Game contractData={contractData} />
         <Footer />

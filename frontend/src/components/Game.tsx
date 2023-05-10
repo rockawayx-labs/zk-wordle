@@ -105,7 +105,7 @@ export function Game({ contractData }: GameProps) {
   };
 
   return (
-    <Stack>
+    <Stack spacing='xs'>
       <GameStats
         commitment={contractData?.commitment}
         imageId={contractData?.imageId}
@@ -144,7 +144,7 @@ export function Game({ contractData }: GameProps) {
       <FormProvider form={form}>
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack>
-            <Row disabled={loading || status !== "playing"} />
+            {status === "playing" && <Row disabled={loading} />}
             <Button
               type="submit"
               loading={loading}

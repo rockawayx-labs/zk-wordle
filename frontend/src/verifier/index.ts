@@ -27,6 +27,7 @@ export class Verifier {
         reject(event.error);
       };
 
+      // slice(2) to remove the 0x prefix
       this.worker.postMessage([receipt, imageId.slice(2), commitment.slice(2)]);
     });
   }
