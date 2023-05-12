@@ -2,8 +2,6 @@
 
 The app is deployed here: [http://zkwordle.rockawayx.com](http://zkwordle.rockawayx.com)
 
-https://user-images.githubusercontent.com/16494885/229332386-daa3f54a-4090-4000-9389-19ffb6c92690.mov
-
 ![screenshot-zk-wordle](https://user-images.githubusercontent.com/44506010/229332289-2d0a762e-380b-42ac-8fba-32690e533fd1.png)
 
 ## Project Structure
@@ -50,6 +48,20 @@ cargo make build
 ```bash
 cargo make run
 ```
+### Kill
+
+If you kill the process by pressing `CMD+C`  (or `CTRC+C`) it kill only the frontend running on port 8080. 
+Make sure to kill the server running on port 9000 too. 
+
+List all processes running on port 9000:
+```bash
+lsof -i tcp:9000
+```
+
+Kill process given its PID
+```bash
+kill -9 <PID>
+```
 
 ## Docker
 The easiest way to run the project is to use Docker.
@@ -68,5 +80,10 @@ You can now access the app at http://localhost:8080
 
 
 ## System architecture
-![zk-wordle-schema](https://user-images.githubusercontent.com/44506010/229330943-85b96ec2-a846-4e8b-8356-67a279b34207.png)
+![architecture](https://github.com/RBFLabs/zk-wordle/assets/44506010/e9f53fe1-9874-4ee8-a147-1d9b8137e241)
+
+## Game flow
+![game-flow](https://github.com/RBFLabs/zk-wordle/assets/44506010/9ac8fb73-c96a-4f3e-9182-a46c60f92341)
+
+
 
