@@ -19,7 +19,7 @@ RUN cargo install wasm-pack
 
 WORKDIR /usr/src/zk-wordle
 
-COPY ./Cargo.toml ./Cargo.lock ./Makefile.toml ./rust-toolchain.toml ./rustfmt.toml ./
+COPY ./Cargo.* ./*.toml ./
 COPY ./backend ./backend
 COPY ./contract ./contract
 COPY ./core ./core
